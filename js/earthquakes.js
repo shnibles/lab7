@@ -24,6 +24,9 @@ gov.usgs.quakes;
 //reference to our google map
 gov.usgs.quakesMap;
 
+// reference to the latest infoWindow object
+gov.usgs.iw;
+
 //AJAX Error event handler
 //just alerts the user of the error
 $(document).ajaxError(function(event, jqXHR, err){
@@ -74,7 +77,7 @@ function addQuakeMarkers(quakes, map) {
 	var index; 		// loop counter
 	var infoWindpw; // InfoWindow for quake
 
-	for(index = 0; index < quakes.length; index++) {
+	for (index = 0; index < quakes.length; index++) {
 		quake = quakes[index];
 
 		if (quake.location) {
@@ -109,7 +112,11 @@ function registerInfoWindow(map, marker, infoWindow) {
 	// add a click listener to the specific marker and infoWindow at the 
 	// time they are created
 	google.maps.event.addListener(marker, 'click', function(){
+		if (gov.usgs.iw) {
+			gov.usgs.iw.close();
+		}
 
+		gov.usgs.iw = infoWindow;
 		infoWindow.open(map, marker);
 
 	});
