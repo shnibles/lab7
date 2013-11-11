@@ -36,10 +36,16 @@ $(document).ajaxError(function(event, jqXHR, err){
 // getQuakes()
 // queries the server for the list of recent quakes
 // and plots them on a Google Map
-function getQuakes() {
+function getQuakes(minMagnitude) {
+
+	// if minMagnitude was specified, add that as a filter
+	var url = gov.usgs.quakesUrl;
+	if (minMagnitude) {
+		url += '&$where=magnitude>=' + minMagnitude;
+	}
 
 	// update quakes array with data from soda.demo.socrata.com
-	$.getJSON(gov.usgs.quakesUrl, function(quakes){
+	$.getJSON(url, function(quakes){
 		// quakes is an array of objects, each of which represents info about a quake
 		// see data returned from:
 		//  https://soda.demo.socrata.com/resource/earthquakes.json?$$app_token=Hwu90cjqyFghuAWQgannew7Oi
@@ -131,5 +137,12 @@ $(function() {
 	$('.message').html('Loading... <img src="img/loading.gif">');
 
 	getQuakes();
+
+	// add click listener to refresh button
+	// send optional mininum magnitude value to getQuakes()
+	$('.refresh-button').click(function() {
+		var minMagnitude = $('.min-magnitude').val();
+		getQuakes(minMagnitude);
+	});
 
 }); // doc ready
