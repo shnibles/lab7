@@ -126,6 +126,10 @@ function registerInfoWindow(map, marker, infoWindow) {
 $(function() {
 	// document is ready for manipulation
 
+	// add 'loading' text and img to tell user it's working
+	// if the server is a bit too slow
+	$('.message').html('Loading... <img src="img/loading.gif">');
+
 	getQuakes();
 
 }); // doc ready
