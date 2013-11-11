@@ -34,6 +34,8 @@ $(document).ajaxError(function(event, jqXHR, err){
 // queries the server for the list of recent quakes
 // and plots them on a Google Map
 function getQuakes() {
+
+	// update quakes array with data from soda.demo.socrata.com
 	$.getJSON(gov.usgs.quakesUrl, function(quakes){
 		// quakes is an array of objects, each of which represents info about a quake
 		// see data returned from:
@@ -47,19 +49,76 @@ function getQuakes() {
 		$('.message').html("Displaying " + quakes.length + " earthquakes");
 
 		// create a new Google Map.
-		// deactivate street view, set coords to 0/0 since this is a global map
-		gov.usg.quakesMap = new google.maps.Map($('.map-container')[0], {
+		gov.usgs.quakesMap = new google.maps.Map($('.map-container')[0], {
 			center: new google.maps.LatLng(0,0), 		// centered on 0/0
 			zoom: 2, 									// zoom level 2
 			mapTypeId: google.maps.MapTypeId.TERRAIN, 	// terrain map
 			streetViewControl: false					// no street view
 		});
+
+		// update map to include map markers for quakes
+		addQuakeMarkers(quakes, gov.usgs.quakesMap);
 	}); // handle returned data function
 
 } // getQuakes()
 
+// addQuakeMarkers()
+// parameters
+// - quakes (array) array of quake data objects
+// - map (google.maps.Map) Google map we can add markers to
+// no return value
+function addQuakeMarkers(quakes, map) {
+
+	// loop over the quakes array and add a marker for each quake
+	var quake; 		// current quake data
+	var index; 		// loop counter
+	var infoWindpw; // InfoWindow for quake
+
+	for(index = 0; index < quakes.length; index++) {
+		quake = quakes[index];
+
+		if (quake.location) {
+			// assuming that the variable 'quake' is set to
+			// the current quake object within the quakes array...
+			quake.mapMarker = new google.maps.Marker({
+				map: map,
+				position: new google.maps.LatLng(quake.location.latitude, quake.location.longitude)
+			});
+
+			// add popup InfoWindow to show detailed info
+			// about the quake when a user clicks on it
+			infoWindow = new google.maps.InfoWindow({
+				content: new Date(quake.datetime).toLocaleString() + 
+							': magnitude ' + quake.magnitude + ' at depth of ' + 
+							quake.depth + ' meters'
+			});
+
+			registerInfoWindow(map, quake.mapMarker, infoWindow);
+		}
+	}
+} // addQuakeMarkers
+
+// registerInfoWindow
+// parameters
+// - map (google.maps.Map) Google map with markers
+// - marker (google.maps.Marker) marker of a quake
+// - infoWindow (google.maps.InfowWindow) popup with detailed information
+// no return value
+function registerInfoWindow(map, marker, infoWindow) {
+
+	// add a click listener to the specific marker and infoWindow at the 
+	// time they are created
+	google.maps.event.addListener(marker, 'click', function(){
+
+		infoWindow.open(map, marker);
+
+	});
+} // registerInfoWindow()
+
 // function to call when document is ready
 $(function() {
 	// document is ready for manipulation
+
 	getQuakes();
+
 }); // doc ready
